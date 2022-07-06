@@ -49,6 +49,6 @@ export default {
         return Response.redirect(fetchBadgeURL("Visits", count.toString()), 302);
       }
     }
-    return new Response("Hello World!");
+    return new Response("Serverless Badges Service with Cloudflare Workers.");
   },
 };

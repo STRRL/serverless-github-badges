@@ -3,5 +3,5 @@ export function fetchBadgeURL(
   message: string,
   color = "brightgreen"
 ): string {
-  return `https://img.shields.io/badge/${label}-${message}-${color}`;
+  return `https://img.shields.io/badge/${label}-${message}-${color}?style=flat-square`;
 }
