@@ -10,5 +10,9 @@
   "scripts": {
     "start": "wrangler dev",
     "deploy": "wrangler publish"
+  },
+  "dependencies": {
+    "node-rsa": "^1.1.1",
+    "octokit": "^1.8.1"
   }
 }
