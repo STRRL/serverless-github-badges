@@ -7,3 +7,19 @@ It would be cheap and easy to deploy, more important, it has better availability
 ## Currently available badges
 
 [![Visits Badge](https://badges.strrl.dev/visits/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+
+Return the badge contains the counter of certain GitHub repository.
+
+### Usage
+
+URL:
+
+```url
+https://badges.strrl.dev/visits/${owner}/${repo}
+```
+
+Markdown:
+
+```markdown
+[![Visits Badge](https://badges.strrl.dev/visits/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+```
