@@ -1,4 +1,4 @@
-name = "serverless-visitor-badge"
+name = "serverless-github-badges"
 main = "src/index.ts"
 compatibility_date = "2022-07-04"
 node_compat = true
