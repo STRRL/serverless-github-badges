@@ -23,8 +23,8 @@ export interface Env {
   //
   // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
   // MY_BUCKET: R2Bucket;
-  
-  // There are several required secret environment variables, replace with wrangler secrets put <secret-name> before deploy your own service. 
+
+  // There are several required secret environment variables, replace with wrangler secrets put <secret-name> before deploy your own service.
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_APP_DEFAULT_INSTALLATION_ID: string;
@@ -62,8 +62,13 @@ export default {
             `github-repo-visit-${githubUsername}-${githubRepoName}`,
             env.VISITS_KV
           );
-
-          return await buildNoCacheResponseAsProxy(fetchBadgeURL("Visits", count.toString()));
+          let query = "";
+          if (request.url.includes("?")) {
+            query = request.url.substring(request.url.indexOf("?"));
+          }
+          return await buildNoCacheResponseAsProxy(
+            fetchBadgeURL("Visits", count.toString(), query)
+          );
         }
         return new Response(
           `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
@@ -72,6 +77,7 @@ export default {
       return new Response("Serverless Badges Service with Cloudflare Workers.");
     } catch (err) {
       sentry.captureException(err);
+      console.log(err);
       return new Response("Something went wrong", {
         status: 500,
         statusText: "Internal Server Error",
