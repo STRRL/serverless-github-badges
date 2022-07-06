@@ -6,3 +6,4 @@ It would be cheap and easy to deploy, more important, it has better availability
 
 ## Currently available badges
 
+[![Visits Badge](https://badges.strrl.dev/visits/STRRL/serverless-github-badges)](https://badges.strrl.dev)
