@@ -12,6 +12,7 @@ import { githubRepoExisted } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
+import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
 
 export interface Env {
   // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -62,13 +63,7 @@ export default {
             env.VISITS_KV
           );
 
-          const originResponse = (
-            await fetch(fetchBadgeURL("Visits", count.toString()))
-          ).clone();
-
-          const result = new Response(originResponse.body, originResponse);
-          result.headers.set("Cache-Control", "no-cache");
-          return result;
+          return await buildNoCacheResponseAsProxy(fetchBadgeURL("Visits", count.toString()));
         }
         return new Response(
           `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
