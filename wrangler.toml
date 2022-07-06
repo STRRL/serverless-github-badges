@@ -4,5 +4,5 @@ compatibility_date = "2022-07-04"
 node_compat = true
 
 kv_namespaces = [
-    { binding = "VISITS_KV", id = "ffcecb7285b84e6fba21040dd3e207d6" },
+    { binding = "VISITS_KV", id = "ffcecb7285b84e6fba21040dd3e207d6", preview_id = "ffcecb7285b84e6fba21040dd3e207d6" },
 ]

@@ -53,6 +53,7 @@ export default {
           302
         );
       }
+      return new Response(`No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`)
     }
     return new Response("Serverless Badges Service with Cloudflare Workers.");
   },
