@@ -23,6 +23,7 @@ export interface Env {
   // MY_BUCKET: R2Bucket;
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
+  GITHUB_APP_DEFAULT_INSTALLATION_ID: string;
 }
 
 export default {
@@ -39,14 +40,18 @@ export default {
         env.GITHUB_APP_ID,
         env.GITHUB_APP_PRIVATE_KEY,
         githubUsername,
-        githubRepoName
+        githubRepoName,
+        parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID)
       );
       if (existed) {
         const count = await increaseAndGet(
           `github-repo-visit-${githubUsername}-${githubRepoName}`,
           env.VISITS_KV
         );
-        return Response.redirect(fetchBadgeURL("Visits", count.toString()), 302);
+        return Response.redirect(
+          fetchBadgeURL("Visits", count.toString()),
+          302
+        );
       }
     }
     return new Response("Serverless Badges Service with Cloudflare Workers.");

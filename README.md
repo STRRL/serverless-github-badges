@@ -14,7 +14,7 @@ Return the badge contains the counter of certain GitHub repository.
 
 URL:
 
-```url
+```text
 https://badges.strrl.dev/visits/${owner}/${repo}
 ```
 
