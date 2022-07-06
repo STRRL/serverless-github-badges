@@ -46,7 +46,7 @@ export default {
           `github-repo-visit-${githubUsername}-${githubRepoName}`,
           env.VISITS_KV
         );
-        return Response.redirect(fetchBadgeURL("Visit", count.toString()), 302);
+        return Response.redirect(fetchBadgeURL("Visits", count.toString()), 302);
       }
     }
     return new Response("Hello World!");
