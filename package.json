@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "node-rsa": "^1.1.1",
-    "octokit": "^1.8.1"
+    "octokit": "^1.8.1",
+    "toucan-js": "^2.6.1"
   }
 }

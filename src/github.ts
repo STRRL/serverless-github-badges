@@ -1,11 +1,13 @@
 import { App } from "octokit";
+import Toucan from "toucan-js";
 
 export async function githubRepoExisted(
   appId: string,
   privateKey: string,
   owner: string,
   repo: string,
-  installationID: number
+  installationID: number,
+  sentry: Toucan
 ): Promise<boolean> {
   const app = new App({
     appId: appId,
@@ -19,6 +21,10 @@ export async function githubRepoExisted(
     });
     return Promise.resolve(true);
   } catch (e) {
+    sentry.setExtra("owner", owner);
+    sentry.setExtra("repo", repo);
+    sentry.setExtra("installationID", installationID);
+    sentry.captureException(e);
     return Promise.resolve(false);
   }
 }

@@ -11,6 +11,7 @@
 import { githubRepoExisted } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
+import Toucan from "toucan-js";
 
 export interface Env {
   // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -21,9 +22,12 @@ export interface Env {
   //
   // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
   // MY_BUCKET: R2Bucket;
+  
+  // There are several required secret environment variables, replace with wrangler secrets put <secret-name> before deploy your own service. 
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_APP_DEFAULT_INSTALLATION_ID: string;
+  SENTRY_DSN: string;
 }
 
 export default {
@@ -32,35 +36,51 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const { pathname } = new URL(request.url);
-    if (pathname.startsWith("/visits")) {
-      const githubUsername = pathname.split("/")[2];
-      const githubRepoName = pathname.split("/")[3];
-      const existed = await githubRepoExisted(
-        env.GITHUB_APP_ID,
-        env.GITHUB_APP_PRIVATE_KEY,
-        githubUsername,
-        githubRepoName,
-        parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID)
-      );
-      if (existed) {
-        const count = await increaseAndGet(
-          `github-repo-visit-${githubUsername}-${githubRepoName}`,
-          env.VISITS_KV
+    const sentry = new Toucan({
+      dsn: env.SENTRY_DSN,
+      context: ctx, // Includes 'waitUntil', which is essential for Sentry logs to be delivered. Modules workers do not include 'request' in context -- you'll need to set it separately.
+      request, // request is not included in 'context', so we set it here.
+      allowedHeaders: ["user-agent"],
+      allowedSearchParams: /(.*)/,
+    });
+    try {
+      const { pathname } = new URL(request.url);
+      if (pathname.startsWith("/visits")) {
+        const githubUsername = pathname.split("/")[2];
+        const githubRepoName = pathname.split("/")[3];
+        const existed = await githubRepoExisted(
+          env.GITHUB_APP_ID,
+          env.GITHUB_APP_PRIVATE_KEY,
+          githubUsername,
+          githubRepoName,
+          parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+          sentry
         );
+        if (existed) {
+          const count = await increaseAndGet(
+            `github-repo-visit-${githubUsername}-${githubRepoName}`,
+            env.VISITS_KV
+          );
 
-        const originResponse = (
-          await fetch(fetchBadgeURL("Visits", count.toString()))
-        ).clone();
+          const originResponse = (
+            await fetch(fetchBadgeURL("Visits", count.toString()))
+          ).clone();
 
-        const result = new Response(originResponse.body, originResponse);
-        result.headers.set("Cache-Control", "no-cache");
-        return result;
+          const result = new Response(originResponse.body, originResponse);
+          result.headers.set("Cache-Control", "no-cache");
+          return result;
+        }
+        return new Response(
+          `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
+        );
       }
-      return new Response(
-        `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
-      );
+      return new Response("Serverless Badges Service with Cloudflare Workers.");
+    } catch (err) {
+      sentry.captureException(err);
+      return new Response("Something went wrong", {
+        status: 500,
+        statusText: "Internal Server Error",
+      });
     }
-    return new Response("Serverless Badges Service with Cloudflare Workers.");
   },
 };
