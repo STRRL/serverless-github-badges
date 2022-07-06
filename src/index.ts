@@ -48,12 +48,18 @@ export default {
           `github-repo-visit-${githubUsername}-${githubRepoName}`,
           env.VISITS_KV
         );
-        return Response.redirect(
-          fetchBadgeURL("Visits", count.toString()),
-          302
-        );
+
+        const originResponse = (
+          await fetch(fetchBadgeURL("Visits", count.toString()))
+        ).clone();
+
+        const result = new Response(originResponse.body, originResponse);
+        result.headers.set("Cache-Control", "no-cache");
+        return result;
       }
-      return new Response(`No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`)
+      return new Response(
+        `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
+      );
     }
     return new Response("Serverless Badges Service with Cloudflare Workers.");
   },
