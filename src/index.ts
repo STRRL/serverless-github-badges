@@ -13,6 +13,7 @@ import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
 import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
+import { Router } from "itty-router";
 
 export interface Env {
   // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -31,6 +32,42 @@ export interface Env {
   SENTRY_DSN: string;
 }
 
+const router = Router();
+router.get("/visits/:owner/:repo", async (request, env, sentry) => {
+  const githubUsername = request.params!.owner;
+  const githubRepoName = request.params!.repo;
+  const existed = await githubRepoExisted(
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    githubUsername,
+    githubRepoName,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  );
+  if (existed) {
+    const count = await increaseAndGet(
+      `github-repo-visit-${githubUsername}-${githubRepoName}`,
+      env.VISITS_KV
+    );
+    let query = "";
+    if (request.url.includes("?")) {
+      query = request.url.substring(request.url.indexOf("?"));
+    }
+    return await buildNoCacheResponseAsProxy(
+      fetchBadgeURL("Visits", count.toString(), query)
+    );
+  }
+  return new Response(
+    `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
+  );
+});
+
+router.get("/", async () => {
+  return new Response("Serverless Badges Service with Cloudflare Workers.");
+});
+
+router.all("*", () => new Response("Not Found.", { status: 404 }));
+
 export default {
   async fetch(
     request: Request,
@@ -45,36 +82,12 @@ export default {
       allowedSearchParams: /(.*)/,
     });
     try {
-      const { pathname } = new URL(request.url);
-      if (pathname.startsWith("/visits")) {
-        const githubUsername = pathname.split("/")[2];
-        const githubRepoName = pathname.split("/")[3];
-        const existed = await githubRepoExisted(
-          env.GITHUB_APP_ID,
-          env.GITHUB_APP_PRIVATE_KEY,
-          githubUsername,
-          githubRepoName,
-          parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-          sentry
-        );
-        if (existed) {
-          const count = await increaseAndGet(
-            `github-repo-visit-${githubUsername}-${githubRepoName}`,
-            env.VISITS_KV
-          );
-          let query = "";
-          if (request.url.includes("?")) {
-            query = request.url.substring(request.url.indexOf("?"));
-          }
-          return await buildNoCacheResponseAsProxy(
-            fetchBadgeURL("Visits", count.toString(), query)
-          );
-        }
-        return new Response(
-          `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
-        );
-      }
-      return new Response("Serverless Badges Service with Cloudflare Workers.");
+      const responseFromRouter = (await router.handle(
+        request,
+        env,
+        sentry
+      )) as Response;
+      return responseFromRouter;
     } catch (err) {
       sentry.captureException(err);
       console.log(err);

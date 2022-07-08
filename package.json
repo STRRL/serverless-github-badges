@@ -12,6 +12,7 @@
     "deploy": "wrangler publish"
   },
   "dependencies": {
+    "itty-router": "^2.6.1",
     "node-rsa": "^1.1.1",
     "octokit": "^1.8.1",
     "toucan-js": "^2.6.1"
