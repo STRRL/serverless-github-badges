@@ -10,8 +10,6 @@ It would be cheap and easy to deploy, more important, it has better availability
 
 Return the badge contains the counter of certain GitHub repository.
 
-### Usage
-
 URL:
 
 ```text
@@ -20,6 +18,26 @@ https://badges.strrl.dev/visits/${owner}/${repo}
 
 Markdown:
 
-```markdown
-[![Visits Badge](https://badges.strrl.dev/visits/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+```text
+[![Visits Badge](https://badges.strrl.dev/visits/${owner}/${repo})](https://badges.strrl.dev)
 ```
+
+---
+
+[![Years Badge](https://badges.strrl.dev/years/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the number of years you have been a GitHub member.
+
+URL:
+
+```text
+https://badges.strrl.dev/years/${user}
+```
+
+Markdown:
+
+```text
+[![Years Badge](https://badges.strrl.dev/years/${user})](https://badges.strrl.dev)
+```
+
+---
