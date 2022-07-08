@@ -28,3 +28,31 @@ export async function githubRepoExisted(
     return Promise.resolve(false);
   }
 }
+
+export async function howLongGithubUserCreatedInYears(
+  user: string,
+  appId: string,
+  privateKey: string,
+  installationID: number,
+  sentry: Toucan
+):Promise<number>{
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await await app.getInstallationOctokit(installationID);
+  try {
+    const userGetResponse = await octokit.rest.users.getByUsername({
+      username: user,
+    });
+    const createdAt = new Date(userGetResponse.data.created_at);
+    const now = new Date();
+    const years = now.getFullYear() - createdAt.getFullYear();
+    return Promise.resolve(years);
+  } catch (e) {
+    sentry.setExtra("user", user);
+    sentry.setExtra("installationID", installationID);
+    sentry.captureException(e);
+    return Promise.resolve(0);
+  }
+}

@@ -8,7 +8,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { githubRepoExisted } from "./github";
+import { githubRepoExisted, howLongGithubUserCreatedInYears } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
@@ -61,6 +61,25 @@ router.get("/visits/:owner/:repo", async (request, env, sentry) => {
     `No Permission to Access GitHub Repository: ${githubUsername}/${githubRepoName}. Please Make Sure It Exists, and Installed the Github App “Serverless Github Badges” for the Private Repository.`
   );
 });
+
+router.get("/years/:user", async (request, env, sentry) => {
+  const createdInYears = await howLongGithubUserCreatedInYears(
+    request.params!.user,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  );
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL("Years", createdInYears.toString(), query)
+  );
+});
+
+router.get("/repos/:owner", async (request, env, sentry) => {});
 
 router.get("/", async () => {
   return new Response("Serverless Badges Service with Cloudflare Workers.");
