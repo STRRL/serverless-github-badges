@@ -109,7 +109,7 @@ router.get("/gists/:owner", async (request, env, sentry) => {
     query = request.url.substring(request.url.indexOf("?"));
   }
   return await buildNoCacheResponseAsProxy(
-    fetchBadgeURL("Gist", count.toString(), query)
+    fetchBadgeURL("Gists", count.toString(), query)
   );
 })
 
@@ -183,6 +183,7 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
   switch (request.params!.periodicity) {
     case 'all':
       title = 'All commits'
+      break;
     case 'daily':
       title = 'Commits today'
       break;
@@ -209,7 +210,7 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
 })
 
 router.get("/", async () => {
-  return new Response("Serverless Badges Service with Cloudflare Workers.");
+  return Response.redirect("https://github.com/STRRL/serverless-github-badges", 302)
 });
 
 router.all("*", () => new Response("Not Found.", { status: 404 }));

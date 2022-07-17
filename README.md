@@ -41,3 +41,101 @@ Markdown:
 ```
 
 ---
+
+[![Public Repos Badge](https://badges.strrl.dev/repos/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the number of your public repository.
+
+URL:
+
+```text
+https://badges.strrl.dev/repos/${user}
+```
+
+Markdown:
+
+```text
+[![Public Repos Badge](https://badges.strrl.dev/repos/${user})](https://badges.strrl.dev)
+```
+
+---
+
+[![Public Gists Badge](https://badges.strrl.dev/gists/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the number of your public gists.
+
+URL:
+
+```text
+https://badges.strrl.dev/gists/${user}
+```
+
+Markdown:
+
+```text
+[![Public Gists Badge](https://badges.strrl.dev/gists/${user})](https://badges.strrl.dev)
+```
+
+---
+
+[![Repo Updated Badge](https://badges.strrl.dev/updated/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+
+Return the badge contains the last updated time of this repository.
+
+URL:
+
+```text
+https://badges.strrl.dev/updated/${owner}/${repo}
+```
+
+Markdown:
+
+```text
+[![Repo Updated Badge](https://badges.strrl.dev/updated/${owner}/${repo})](https://badges.strrl.dev)
+```
+
+---
+
+[![Repo Created Badge](https://badges.strrl.dev/created/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+
+Return the badge contains the created time of this repository.
+
+URL:
+
+```text
+https://badges.strrl.dev/created/${owner}/${repo}
+```
+
+Markdown:
+
+```text
+[![Repo Created Badge](https://badges.strrl.dev/created/${owner}/${repo})](https://badges.strrl.dev)
+```
+
+---
+
+[![Commits Badge](https://badges.strrl.dev/commits/daily/STRRL)](https://badges.strrl.dev)
+
+[![Commits Badge](https://badges.strrl.dev/commits/weekly/STRRL)](https://badges.strrl.dev)
+
+[![Commits Badge](https://badges.strrl.dev/commits/monthly/STRRL)](https://badges.strrl.dev)
+
+[![Commits Badge](https://badges.strrl.dev/commits/yearly/STRRL)](https://badges.strrl.dev)
+
+[![Commits Badge](https://badges.strrl.dev/commits/all/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the commits in the certain periodicity.
+
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+
+URL:
+
+```text
+https://badges.strrl.dev/commits/${periodicity}/${user}
+```
+
+Markdown:
+
+```text
+[![Commits Badge](https://badges.strrl.dev/commits/${periodicity}/${user})](https://badges.strrl.dev)
+```
