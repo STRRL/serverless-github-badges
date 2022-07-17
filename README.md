@@ -114,6 +114,52 @@ Markdown:
 
 ---
 
+[![Contributions Badge](https://badges.strrl.dev/contributions/daily/STRRL)](https://badges.strrl.dev)
+
+[![Contributions Badge](https://badges.strrl.dev/contributions/weekly/STRRL)](https://badges.strrl.dev)
+
+[![Contributions Badge](https://badges.strrl.dev/contributions/monthly/STRRL)](https://badges.strrl.dev)
+
+[![Contributions Badge](https://badges.strrl.dev/contributions/yearly/STRRL)](https://badges.strrl.dev)
+
+[![Contributions Badge](https://badges.strrl.dev/contributions/all/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the contributions in the certain periodicity.
+
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+
+URL:
+
+```text
+https://badges.strrl.dev/contributions/${periodicity}/${user}
+```
+
+Markdown:
+
+```text
+[![Contributions Badge](https://badges.strrl.dev/contributions/${periodicity}/${user})](https://badges.strrl.dev)
+```
+
+---
+
+[![Repo Created Badge](https://badges.strrl.dev/created/STRRL/serverless-github-badges)](https://badges.strrl.dev)
+
+Return the badge contains the created time of this repository.
+
+URL:
+
+```text
+https://badges.strrl.dev/created/${owner}/${repo}
+```
+
+Markdown:
+
+```text
+[![Repo Created Badge](https://badges.strrl.dev/created/${owner}/${repo})](https://badges.strrl.dev)
+```
+
+---
+
 [![Commits Badge](https://badges.strrl.dev/commits/daily/STRRL)](https://badges.strrl.dev)
 
 [![Commits Badge](https://badges.strrl.dev/commits/weekly/STRRL)](https://badges.strrl.dev)

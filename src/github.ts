@@ -228,3 +228,71 @@ export async function countOfIssueOrPRsAfterDate(
     throw e;
   }
 }
+
+export async function countOfUserContributionsAfterDate(
+  user: string,
+  start: Date,
+  end: Date,
+  allContribution: boolean,
+  appId: string,
+  privateKey: string,
+  installationID: number,
+  sentry: Toucan
+): Promise<number> {
+  try {
+    const app = new App({
+      appId: appId,
+      privateKey: privateKey,
+    });
+
+    const octokit = await app.getInstallationOctokit(installationID);
+
+    if (allContribution) {
+      const response = await octokit.graphql(
+        `
+query { 
+  user(login: "${user}") {
+    email
+    contributionsCollection {
+      contributionYears
+    }
+  }
+}
+        `
+      ) as any
+      const years = response.user.contributionsCollection.contributionYears as Array<number>
+      const results = await Promise.all(years.map(year => {
+        const yearStart = new Date(`${year}-01-01`)
+        const yearEnd = new Date(`${year}-12-31`)
+        return countOfUserContributionsAfterDate(user, yearStart, yearEnd, false, appId, privateKey, installationID, sentry)
+      }))
+      const allContributions = results.reduce((prev, curr) => prev + curr, 0)
+      return allContributions
+    }
+
+    const response = await octokit.graphql(
+      `
+query { 
+  user(login: "${user}") {
+    email
+    createdAt
+    contributionsCollection(from: "${start.toISOString()}", to: "${end.toISOString()}") {
+      contributionCalendar {
+        totalContributions
+      }
+    }
+  }
+}
+  `
+    )
+
+    const result = (response as any).user.contributionsCollection.contributionCalendar.totalContributions as number
+    return result;
+  } catch (e) {
+    sentry.setExtra("owner", user);
+    sentry.setExtra("start", start);
+    sentry.setExtra("installationID", installationID);
+    sentry.captureException(e);
+    throw e;
+  }
+}

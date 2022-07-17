@@ -8,7 +8,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { countOfCommitsAfterDate, countOfIssueOrPRsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
+import { countOfCommitsAfterDate, countOfIssueOrPRsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, countOfUserContributionsAfterDate, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
@@ -195,6 +195,69 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
       break;
     case 'yearly':
       title = 'Commits this year'
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL(title, commits.toString(), query)
+  );
+})
+
+
+router.get('/contributions/:periodicity/:user', async (request, env, sentry) => {
+  const now = new Date()
+  let start = now;
+  switch (request.params!.periodicity) {
+    case 'all':
+      start = new Date('1970-01-01');
+    case 'daily':
+      start.setDate(now.getDate() - 1)
+      break;
+    case 'weekly':
+      start.setDate(now.getDate() - 7)
+      break;
+    case 'monthly':
+      start.setDate(now.getDate() - 30)
+      break;
+    case 'yearly':
+      start.setDate(now.getDate() - 365)
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+  const commits = await countOfUserContributionsAfterDate(
+    request.params!.user,
+    start,
+    new Date(),
+    request.params!.periodicity == 'all',
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+
+  let title = ''
+  switch (request.params!.periodicity) {
+    case 'all':
+      title = 'All contributions'
+      break;
+    case 'daily':
+      title = 'Contributions today'
+      break;
+    case 'weekly':
+      title = 'Contributions this week'
+      break;
+    case 'monthly':
+      title = 'Contributions this month'
+      break;
+    case 'yearly':
+      title = 'Contributions this year'
       break;
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
