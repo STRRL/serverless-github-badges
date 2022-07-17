@@ -139,3 +139,87 @@ Markdown:
 ```text
 [![Commits Badge](https://badges.strrl.dev/commits/${periodicity}/${user})](https://badges.strrl.dev)
 ```
+
+---
+
+[![Issues Badge](https://badges.strrl.dev/issues/daily/STRRL)](https://badges.strrl.dev)
+
+[![Issues Badge](https://badges.strrl.dev/issues/weekly/STRRL)](https://badges.strrl.dev)
+
+[![Issues Badge](https://badges.strrl.dev/issues/monthly/STRRL)](https://badges.strrl.dev)
+
+[![Issues Badge](https://badges.strrl.dev/issues/yearly/STRRL)](https://badges.strrl.dev)
+
+[![Issues Badge](https://badges.strrl.dev/issues/all/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the created issues in the certain periodicity.
+
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+
+URL:
+
+```text
+https://badges.strrl.dev/issues/${periodicity}/${user}
+```
+
+Markdown:
+
+```text
+[![Issues Badge](https://badges.strrl.dev/issues/${periodicity}/${user})](https://badges.strrl.dev)
+```
+
+---
+
+[![PRs Badge](https://badges.strrl.dev/prs/daily/STRRL)](https://badges.strrl.dev)
+
+[![PRs Badge](https://badges.strrl.dev/prs/weekly/STRRL)](https://badges.strrl.dev)
+
+[![PRs Badge](https://badges.strrl.dev/prs/monthly/STRRL)](https://badges.strrl.dev)
+
+[![PRs Badge](https://badges.strrl.dev/prs/yearly/STRRL)](https://badges.strrl.dev)
+
+[![PRs Badge](https://badges.strrl.dev/prs/all/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the created PRs in the certain periodicity.
+
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+
+URL:
+
+```text
+https://badges.strrl.dev/prs/${periodicity}/${user}
+```
+
+Markdown:
+
+```text
+[![PRs Badge](https://badges.strrl.dev/prs/${periodicity}/${user})](https://badges.strrl.dev)
+```
+
+---
+
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/daily/STRRL)](https://badges.strrl.dev)
+
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/weekly/STRRL)](https://badges.strrl.dev)
+
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/monthly/STRRL)](https://badges.strrl.dev)
+
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/yearly/STRRL)](https://badges.strrl.dev)
+
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/all/STRRL)](https://badges.strrl.dev)
+
+Return the badge contains the commits in the certain periodicity.
+
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+
+URL:
+
+```text
+https://badges.strrl.dev/issues-and-prs/${periodicity}/${user}
+```
+
+Markdown:
+
+```text
+[![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/${periodicity}/${user})](https://badges.strrl.dev)
+```

@@ -187,3 +187,44 @@ export async function countOfCommitsAfterDate(
     throw e;
   }
 }
+
+export async function countOfIssueOrPRsAfterDate(
+  user: string,
+  start: Date,
+  searchTarget: 'issue' | 'pr' | 'both',
+  appId: string,
+  privateKey: string,
+  installationID: number,
+  sentry: Toucan
+) {
+  try {
+    const app = new App({
+      appId: appId,
+      privateKey: privateKey,
+    });
+    const octokit = await app.getInstallationOctokit(installationID);
+    let q = `author:${user}+author-date:>=${start.toISOString().split('T')[0]}`
+    switch (searchTarget) {
+      case "both":
+        q += "+is:issue"
+        break;
+      case "issue":
+        q += '+is:pr'
+        break;
+      case "both":
+        break;
+      default:
+        throw new Error(`unrecognized searchTarget ${searchTarget}`)
+    }
+
+    octokit.rest.search.issuesAndPullRequests({ q: q })
+    const searchCommitsResponse = await octokit.rest.search.commits({ q: q })
+    return searchCommitsResponse.data.total_count;
+  } catch (e) {
+    sentry.setExtra("owner", user);
+    sentry.setExtra("start", start);
+    sentry.setExtra("installationID", installationID);
+    sentry.captureException(e);
+    throw e;
+  }
+}

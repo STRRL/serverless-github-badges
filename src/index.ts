@@ -8,7 +8,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { countOfCommitsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
+import { countOfCommitsAfterDate, countOfIssueOrPRsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
@@ -195,6 +195,189 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
       break;
     case 'yearly':
       title = 'Commits this year'
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL(title, commits.toString(), query)
+  );
+})
+
+router.get('/issues/:periodicity/:user', async (request, env, sentry) => {
+  const now = new Date()
+  let start = now;
+  switch (request.params!.periodicity) {
+    case 'all':
+      start = new Date('1970-01-01');
+    case 'daily':
+      start.setDate(now.getDate() - 1)
+      break;
+    case 'weekly':
+      start.setDate(now.getDate() - 7)
+      break;
+    case 'monthly':
+      start.setDate(now.getDate() - 30)
+      break;
+    case 'yearly':
+      start.setDate(now.getDate() - 365)
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+  const commits = await countOfIssueOrPRsAfterDate(
+    request.params!.user,
+    start,
+    'issue',
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+
+  let title = ''
+  switch (request.params!.periodicity) {
+    case 'all':
+      title = 'All issues'
+      break;
+    case 'daily':
+      title = 'Issues today'
+      break;
+    case 'weekly':
+      title = 'Issues this week'
+      break;
+    case 'monthly':
+      title = 'Issues this month'
+      break;
+    case 'yearly':
+      title = 'Issues this year'
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL(title, commits.toString(), query)
+  );
+})
+
+router.get('/prs/:periodicity/:user', async (request, env, sentry) => {
+  const now = new Date()
+  let start = now;
+  switch (request.params!.periodicity) {
+    case 'all':
+      start = new Date('1970-01-01');
+    case 'daily':
+      start.setDate(now.getDate() - 1)
+      break;
+    case 'weekly':
+      start.setDate(now.getDate() - 7)
+      break;
+    case 'monthly':
+      start.setDate(now.getDate() - 30)
+      break;
+    case 'yearly':
+      start.setDate(now.getDate() - 365)
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+  const commits = await countOfIssueOrPRsAfterDate(
+    request.params!.user,
+    start,
+    'pr',
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+
+  let title = ''
+  switch (request.params!.periodicity) {
+    case 'all':
+      title = 'All PRs'
+      break;
+    case 'daily':
+      title = 'PRs today'
+      break;
+    case 'weekly':
+      title = 'PRs this week'
+      break;
+    case 'monthly':
+      title = 'PRs this month'
+      break;
+    case 'yearly':
+      title = 'PRs this year'
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL(title, commits.toString(), query)
+  );
+})
+
+router.get('/issues-and-prs/:periodicity/:user', async (request, env, sentry) => {
+  const now = new Date()
+  let start = now;
+  switch (request.params!.periodicity) {
+    case 'all':
+      start = new Date('1970-01-01');
+    case 'daily':
+      start.setDate(now.getDate() - 1)
+      break;
+    case 'weekly':
+      start.setDate(now.getDate() - 7)
+      break;
+    case 'monthly':
+      start.setDate(now.getDate() - 30)
+      break;
+    case 'yearly':
+      start.setDate(now.getDate() - 365)
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+  const commits = await countOfIssueOrPRsAfterDate(
+    request.params!.user,
+    start,
+    'both',
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+
+  let title = ''
+  switch (request.params!.periodicity) {
+    case 'all':
+      title = 'All issue and PRs'
+      break;
+    case 'daily':
+      title = 'Issue and PRs today'
+      break;
+    case 'weekly':
+      title = 'Issue and PRs this week'
+      break;
+    case 'monthly':
+      title = 'Issue and PRs this month'
+      break;
+    case 'yearly':
+      title = 'Issue and PRs this year'
       break;
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
