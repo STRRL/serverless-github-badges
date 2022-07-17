@@ -8,7 +8,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { githubRepoExisted, howLongGithubUserCreatedInYears } from "./github";
+import { countOfCommitsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
@@ -79,7 +79,134 @@ router.get("/years/:user", async (request, env, sentry) => {
   );
 });
 
-router.get("/repos/:owner", async (request, env, sentry) => {});
+router.get("/repos/:owner", async (request, env, sentry) => {
+  const count = await countOfPublicRepositoriesOfUser(
+    request.params!.owner,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL("Repos", count.toString(), query)
+  );
+});
+
+router.get("/gists/:owner", async (request, env, sentry) => {
+  const count = await countOfPublicGistsOfUser(
+    request.params!.owner,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL("Gist", count.toString(), query)
+  );
+})
+
+router.get("/updated/:owner/:repo", async (request, env, sentry) => {
+  const updated = await timeOfRepositoryLastUpdated(
+    request.params!.owner,
+    request.params!.repo,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL("Updated", updated.toString(), query)
+  );
+})
+
+router.get("/created/:owner/:repo", async (request, env, sentry) => {
+  const created = await timeOfRepositoryCreated(
+    request.params!.owner,
+    request.params!.repo,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL("Created", created.toString(), query)
+  );
+})
+
+router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
+  const now = new Date()
+  let start = now;
+  switch (request.params!.periodicity) {
+    case 'all':
+      start = new Date('1970-01-01');
+    case 'daily':
+      start.setDate(now.getDate() - 1)
+      break;
+    case 'weekly':
+      start.setDate(now.getDate() - 7)
+      break;
+    case 'monthly':
+      start.setDate(now.getDate() - 30)
+      break;
+    case 'yearly':
+      start.setDate(now.getDate() - 365)
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+  const commits = await countOfCommitsAfterDate(
+    request.params!.user,
+    start,
+    env.GITHUB_APP_ID,
+    env.GITHUB_APP_PRIVATE_KEY,
+    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+    sentry
+  )
+
+  let title = ''
+  switch (request.params!.periodicity) {
+    case 'all':
+      title = 'All commits'
+    case 'daily':
+      title = 'Commits today'
+      break;
+    case 'weekly':
+      title = 'Commits this week'
+      break;
+    case 'monthly':
+      title = 'Commits this month'
+      break;
+    case 'yearly':
+      title = 'Commits this year'
+      break;
+    default:
+      throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
+  }
+
+  let query = "";
+  if (request.url.includes("?")) {
+    query = request.url.substring(request.url.indexOf("?"));
+  }
+  return await buildNoCacheResponseAsProxy(
+    fetchBadgeURL(title, commits.toString(), query)
+  );
+})
 
 router.get("/", async () => {
   return new Response("Serverless Badges Service with Cloudflare Workers.");

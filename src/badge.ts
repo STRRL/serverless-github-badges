@@ -4,5 +4,7 @@ export function fetchBadgeURL(
   query: string,
   color = "brightgreen"
 ): string {
-  return `https://img.shields.io/badge/${label}-${message}-${color}${query}`;
+  const replacedLabel = encodeURIComponent(label.replaceAll("-", "--"))
+  const replacedMessage = encodeURIComponent(message.replaceAll("-", "--"))
+  return `https://img.shields.io/badge/${replacedLabel}-${replacedMessage}-${color}${query}`;
 }
