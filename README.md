@@ -142,24 +142,6 @@ Markdown:
 
 ---
 
-[![Repo Created Badge](https://badges.strrl.dev/created/STRRL/serverless-github-badges)](https://badges.strrl.dev)
-
-Return the badge contains the created time of this repository.
-
-URL:
-
-```text
-https://badges.strrl.dev/created/${owner}/${repo}
-```
-
-Markdown:
-
-```text
-[![Repo Created Badge](https://badges.strrl.dev/created/${owner}/${repo})](https://badges.strrl.dev)
-```
-
----
-
 [![Commits Badge](https://badges.strrl.dev/commits/daily/STRRL)](https://badges.strrl.dev)
 
 [![Commits Badge](https://badges.strrl.dev/commits/weekly/STRRL)](https://badges.strrl.dev)
