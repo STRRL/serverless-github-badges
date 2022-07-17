@@ -205,10 +205,10 @@ export async function countOfIssueOrPRsAfterDate(
     const octokit = await app.getInstallationOctokit(installationID);
     let q = `author:${user}+author-date:>=${start.toISOString().split('T')[0]}`
     switch (searchTarget) {
-      case "both":
+      case "issue":
         q += "+is:issue"
         break;
-      case "issue":
+      case "pr":
         q += '+is:pr'
         break;
       case "both":
