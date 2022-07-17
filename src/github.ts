@@ -203,10 +203,10 @@ export async function countOfIssueOrPRsAfterDate(
       privateKey: privateKey,
     });
     const octokit = await app.getInstallationOctokit(installationID);
-    let q = `author:${user}+author-date:>=${start.toISOString().split('T')[0]}`
+    let q = `author:${user}+created:>=${start.toISOString().split('T')[0]}`
     switch (searchTarget) {
       case "issue":
-        q += "+is:issue"
+        q += "+type:issue"
         break;
       case "pr":
         q += '+is:pr'
@@ -217,9 +217,9 @@ export async function countOfIssueOrPRsAfterDate(
         throw new Error(`unrecognized searchTarget ${searchTarget}`)
     }
 
-    octokit.rest.search.issuesAndPullRequests({ q: q })
-    const searchCommitsResponse = await octokit.rest.search.commits({ q: q })
-    return searchCommitsResponse.data.total_count;
+    const searchIssuesAndPRsResponse = await octokit.rest.search.issuesAndPullRequests({ q: q })
+    console.log(JSON.stringify(searchIssuesAndPRsResponse))
+    return searchIssuesAndPRsResponse.data.total_count;
   } catch (e) {
     sentry.setExtra("owner", user);
     sentry.setExtra("start", start);
