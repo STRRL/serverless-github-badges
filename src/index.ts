@@ -14,6 +14,7 @@ import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
 import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
 import { Router } from "itty-router";
+import { RequestTracer, wrapModule } from "@cloudflare/workers-honeycomb-logger";
 
 export interface Env {
   // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -30,6 +31,8 @@ export interface Env {
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_APP_DEFAULT_INSTALLATION_ID: string;
   SENTRY_DSN: string;
+  HONEYCOMB_API_KEY: string;
+  HONEYCOMB_DATASET: string;
 }
 
 const router = Router();
@@ -42,7 +45,6 @@ router.get("/visits/:owner/:repo", async (request, env, sentry) => {
     githubUsername,
     githubRepoName,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   );
   if (existed) {
     const count = await increaseAndGet(
@@ -68,7 +70,6 @@ router.get("/years/:user", async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   );
   let query = "";
   if (request.url.includes("?")) {
@@ -85,7 +86,6 @@ router.get("/repos/:owner", async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -102,7 +102,6 @@ router.get("/gists/:owner", async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -120,7 +119,6 @@ router.get("/updated/:owner/:repo", async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -138,7 +136,6 @@ router.get("/created/:owner/:repo", async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -176,7 +173,6 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
 
   let title = ''
@@ -211,6 +207,7 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
 
 
 router.get('/contributions/:periodicity/:user', async (request, env, sentry) => {
+  const tracer = (request as any).tracer as RequestTracer
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
@@ -239,7 +236,7 @@ router.get('/contributions/:periodicity/:user', async (request, env, sentry) => 
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
+    tracer,
   )
 
   let title = ''
@@ -300,7 +297,6 @@ router.get('/issues/:periodicity/:user', async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
 
   let title = ''
@@ -361,7 +357,6 @@ router.get('/prs/:periodicity/:user', async (request, env, sentry) => {
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
 
   let title = ''
@@ -422,7 +417,6 @@ router.get('/issues-and-prs/:periodicity/:user', async (request, env, sentry) =>
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
     parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    sentry
   )
 
   let title = ''
@@ -461,7 +455,7 @@ router.get("/", async () => {
 
 router.all("*", () => new Response("Not Found.", { status: 404 }));
 
-export default {
+const worker = {
   async fetch(
     request: Request,
     env: Env,
@@ -473,6 +467,7 @@ export default {
       request, // request is not included in 'context', so we set it here.
       allowedHeaders: ["user-agent"],
       allowedSearchParams: /(.*)/,
+      tracesSampleRate: 1.0,
     });
     try {
       const responseFromRouter = (await router.handle(
@@ -490,4 +485,22 @@ export default {
       });
     }
   },
+}
+
+const hcConfig = {
+  // it would be override with env HONEYCOMB_API_KEY and HONEYCOMB_DATASET
+  // see the **LAST SENTENCE** of section: https://github.com/cloudflare/workers-honeycomb-logger#module-syntax-configuration
+  apiKey: '',
+  dataset: '',
+  sampleRates: {
+    '1xx': 20,
+    '2xx': 1,
+    '3xx': 5,
+    '4xx': 2,
+    '5xx': 1,
+    exception: 1,
+  },
+  sendTraceContext: true,
 };
+
+export default wrapModule(hcConfig, worker)

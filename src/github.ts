@@ -1,5 +1,6 @@
-import { App } from "octokit";
-import Toucan from "toucan-js";
+import { App, Octokit } from "octokit";
+import { createAppAuth } from "@octokit/auth-app";
+import { RequestTracer } from "@cloudflare/workers-honeycomb-logger";
 
 export async function githubRepoExisted(
   appId: string,
@@ -7,26 +8,18 @@ export async function githubRepoExisted(
   owner: string,
   repo: string,
   installationID: number,
-  sentry: Toucan
 ): Promise<boolean> {
   const app = new App({
     appId: appId,
     privateKey: privateKey,
   });
-  const octokit = await await app.getInstallationOctokit(installationID);
-  try {
-    const repoGetResponse = await octokit.rest.repos.get({
-      owner: owner,
-      repo: repo,
-    });
-    return Promise.resolve(true);
-  } catch (e) {
-    sentry.setExtra("owner", owner);
-    sentry.setExtra("repo", repo);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    return Promise.resolve(false);
-  }
+  const octokit = await app.getInstallationOctokit(installationID);
+  const repoGetResponse = await octokit.rest.repos.get({
+    owner: owner,
+    repo: repo,
+  });
+  return Promise.resolve(true);
+
 }
 
 export async function howLongGithubUserCreatedInYears(
@@ -34,27 +27,19 @@ export async function howLongGithubUserCreatedInYears(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ): Promise<number> {
   const app = new App({
     appId: appId,
     privateKey: privateKey,
   });
-  const octokit = await await app.getInstallationOctokit(installationID);
-  try {
-    const userGetResponse = await octokit.rest.users.getByUsername({
-      username: user,
-    });
-    const createdAt = new Date(userGetResponse.data.created_at);
-    const now = new Date();
-    const years = now.getFullYear() - createdAt.getFullYear();
-    return Promise.resolve(years);
-  } catch (e) {
-    sentry.setExtra("user", user);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const octokit = await app.getInstallationOctokit(installationID);
+  const userGetResponse = await octokit.rest.users.getByUsername({
+    username: user,
+  });
+  const createdAt = new Date(userGetResponse.data.created_at);
+  const now = new Date();
+  const years = now.getFullYear() - createdAt.getFullYear();
+  return Promise.resolve(years);
 }
 
 export async function countOfPublicRepositoriesOfUser(
@@ -62,24 +47,16 @@ export async function countOfPublicRepositoriesOfUser(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await await app.getInstallationOctokit(installationID);
-    const userGetResponse = await octokit.rest.users.getByUsername(
-      { username: user }
-    )
-    return userGetResponse.data.public_repos
-  } catch (e) {
-    sentry.setExtra("user", user);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  const userGetResponse = await octokit.rest.users.getByUsername(
+    { username: user }
+  )
+  return userGetResponse.data.public_repos
 }
 
 export async function countOfPublicGistsOfUser(
@@ -87,24 +64,16 @@ export async function countOfPublicGistsOfUser(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await await app.getInstallationOctokit(installationID);
-    const userGetResponse = await octokit.rest.users.getByUsername(
-      { username: user }
-    )
-    return userGetResponse.data.public_gists
-  } catch (e) {
-    sentry.setExtra("user", user);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  const userGetResponse = await octokit.rest.users.getByUsername(
+    { username: user }
+  )
+  return userGetResponse.data.public_gists
 }
 
 export async function timeOfRepositoryLastUpdated(
@@ -113,26 +82,18 @@ export async function timeOfRepositoryLastUpdated(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await await app.getInstallationOctokit(installationID);
-    const getRepoResponse = octokit.rest.repos.get({
-      owner: owner,
-      repo: repository,
-    })
-    return (await getRepoResponse).data.updated_at
-  } catch (e) {
-    sentry.setExtra("owner", owner);
-    sentry.setExtra("repository", repository);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  const getRepoResponse = octokit.rest.repos.get({
+    owner: owner,
+    repo: repository,
+  })
+  return (await getRepoResponse).data.updated_at
+
 }
 export async function timeOfRepositoryCreated(
   owner: string,
@@ -140,26 +101,17 @@ export async function timeOfRepositoryCreated(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await await app.getInstallationOctokit(installationID);
-    const getRepoResponse = octokit.rest.repos.get({
-      owner: owner,
-      repo: repository,
-    })
-    return (await getRepoResponse).data.created_at
-  } catch (e) {
-    sentry.setExtra("owner", owner);
-    sentry.setExtra("repository", repository);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  const getRepoResponse = octokit.rest.repos.get({
+    owner: owner,
+    repo: repository,
+  })
+  return (await getRepoResponse).data.created_at
 }
 
 export async function countOfCommitsAfterDate(
@@ -168,24 +120,15 @@ export async function countOfCommitsAfterDate(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await app.getInstallationOctokit(installationID);
-    const q = `author:${user}+author-date:>=${start.toISOString().split('T')[0]}`
-    const searchCommitsResponse = await octokit.rest.search.commits({ q: q })
-    return searchCommitsResponse.data.total_count;
-  } catch (e) {
-    sentry.setExtra("owner", user);
-    sentry.setExtra("start", start);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  const q = `author:${user}+author-date:>=${start.toISOString().split('T')[0]}`
+  const searchCommitsResponse = await octokit.rest.search.commits({ q: q })
+  return searchCommitsResponse.data.total_count;
 }
 
 export async function countOfIssueOrPRsAfterDate(
@@ -195,38 +138,29 @@ export async function countOfIssueOrPRsAfterDate(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
 ) {
-  try {
-    const app = new App({
-      appId: appId,
-      privateKey: privateKey,
-    });
-    const octokit = await app.getInstallationOctokit(installationID);
-    let q = `author:${user}+created:>=${start.toISOString().split('T')[0]}`
-    switch (searchTarget) {
-      case "issue":
-        q += "+type:issue"
-        break;
-      case "pr":
-        q += '+is:pr'
-        break;
-      case "both":
-        break;
-      default:
-        throw new Error(`unrecognized searchTarget ${searchTarget}`)
-    }
-
-    const searchIssuesAndPRsResponse = await octokit.rest.search.issuesAndPullRequests({ q: q })
-    console.log(JSON.stringify(searchIssuesAndPRsResponse))
-    return searchIssuesAndPRsResponse.data.total_count;
-  } catch (e) {
-    sentry.setExtra("owner", user);
-    sentry.setExtra("start", start);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
+  const app = new App({
+    appId: appId,
+    privateKey: privateKey,
+  });
+  const octokit = await app.getInstallationOctokit(installationID);
+  let q = `author:${user}+created:>=${start.toISOString().split('T')[0]}`
+  switch (searchTarget) {
+    case "issue":
+      q += "+type:issue"
+      break;
+    case "pr":
+      q += '+is:pr'
+      break;
+    case "both":
+      break;
+    default:
+      throw new Error(`unrecognized searchTarget ${searchTarget}`)
   }
+
+  const searchIssuesAndPRsResponse = await octokit.rest.search.issuesAndPullRequests({ q: q })
+  console.log(JSON.stringify(searchIssuesAndPRsResponse))
+  return searchIssuesAndPRsResponse.data.total_count;
 }
 
 export async function countOfUserContributionsAfterDate(
@@ -237,19 +171,22 @@ export async function countOfUserContributionsAfterDate(
   appId: string,
   privateKey: string,
   installationID: number,
-  sentry: Toucan
+  tracer: RequestTracer,
 ): Promise<number> {
-  try {
-    const app = new App({
+  const octokit = new Octokit({
+    authStrategy: createAppAuth,
+    auth: {
       appId: appId,
       privateKey: privateKey,
-    });
-
-    const octokit = await app.getInstallationOctokit(installationID);
-
-    if (allContribution) {
-      const response = await octokit.graphql(
-        `
+      installationId: installationID,
+    },
+    request: {
+      fetch: tracer.fetch.bind(tracer)
+    }
+  });
+  if (allContribution) {
+    const response = await octokit.graphql(
+      `
 query { 
   user(login: "${user}") {
     email
@@ -259,24 +196,25 @@ query {
   }
 }
         `
-      ) as any
-      const years = response.user.contributionsCollection.contributionYears as Array<number>
-      const results = await Promise.all(years.map(year => {
-        const yearStart = new Date(`${year}-01-01`)
-        const yearEnd = new Date(`${year}-12-31`)
-        return countOfUserContributionsAfterDate(user, yearStart, yearEnd, false, appId, privateKey, installationID, sentry)
-      }))
-      const allContributions = results.reduce((prev, curr) => prev + curr, 0)
-      return allContributions
-    }
+    ) as any
+    const years = response.user.contributionsCollection.contributionYears as Array<number>
+    const results = await Promise.all(years.map(async year => {
+      const yearStart = new Date(`${year}-01-01`)
+      const yearEnd = new Date(`${year}-12-31`)
+      return await countOfUserContributionsAfterDate(user, yearStart, yearEnd, false, appId, privateKey, installationID, tracer)
+    }))
+    const allContributions = results.reduce((prev, curr) => prev + curr, 0)
+    return allContributions
+  }
 
-    const response = await octokit.graphql(
-      `
+  const response = await octokit.graphql(
+    `
 query { 
   user(login: "${user}") {
     email
-    createdAt
     contributionsCollection(from: "${start.toISOString()}", to: "${end.toISOString()}") {
+      startedAt
+      endedAt
       contributionCalendar {
         totalContributions
       }
@@ -284,15 +222,9 @@ query {
   }
 }
   `
-    )
+  )
 
-    const result = (response as any).user.contributionsCollection.contributionCalendar.totalContributions as number
-    return result;
-  } catch (e) {
-    sentry.setExtra("owner", user);
-    sentry.setExtra("start", start);
-    sentry.setExtra("installationID", installationID);
-    sentry.captureException(e);
-    throw e;
-  }
+  const result = (response as any).user.contributionsCollection.contributionCalendar.totalContributions as number
+  console.log(JSON.stringify(response))
+  return result;
 }
