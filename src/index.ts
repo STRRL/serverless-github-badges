@@ -8,12 +8,13 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-import { countOfCommitsAfterDate, countOfIssueOrPRsAfterDate, countOfPublicGistsOfUser, countOfPublicRepositoriesOfUser, countOfUserContributionsAfterDate, githubRepoExisted, howLongGithubUserCreatedInYears, timeOfRepositoryCreated, timeOfRepositoryLastUpdated } from "./github";
+import GitHubClient from "./github";
 import { fetchBadgeURL } from "./badge";
 import { increaseAndGet } from "./counter";
 import Toucan from "toucan-js";
 import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
-import { Router } from "itty-router";
+import { Router, Request as RouterRequest } from "itty-router";
+
 import { RequestTracer, wrapModule } from "@cloudflare/workers-honeycomb-logger";
 
 export interface Env {
@@ -36,15 +37,11 @@ export interface Env {
 }
 
 const router = Router();
-router.get("/visits/:owner/:repo", async (request, env, sentry) => {
+router.get("/visits/:owner/:repo", async (request: RouterRequest, env: Env, sentry, githubClient: GitHubClient) => {
   const githubUsername = request.params!.owner;
   const githubRepoName = request.params!.repo;
-  const existed = await githubRepoExisted(
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    githubUsername,
-    githubRepoName,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+  const existed = await githubClient.githubRepoExisted(
+    githubUsername, githubRepoName, env.GITHUB_APP_DEFAULT_INSTALLATION_ID, sentry
   );
   if (existed) {
     const count = await increaseAndGet(
@@ -64,12 +61,9 @@ router.get("/visits/:owner/:repo", async (request, env, sentry) => {
   );
 });
 
-router.get("/years/:user", async (request, env, sentry) => {
-  const createdInYears = await howLongGithubUserCreatedInYears(
+router.get("/years/:user", async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
+  const createdInYears = await githubClient.howLongGithubUserCreatedInYears(
     request.params!.user,
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   );
   let query = "";
   if (request.url.includes("?")) {
@@ -80,8 +74,8 @@ router.get("/years/:user", async (request, env, sentry) => {
   );
 });
 
-router.get("/repos/:owner", async (request, env, sentry) => {
-  const count = await countOfPublicRepositoriesOfUser(
+router.get("/repos/:owner", async (request, env, sentry, githubClient) => {
+  const count = await githubClient.countOfPublicRepositoriesOfUser(
     request.params!.owner,
     env.GITHUB_APP_ID,
     env.GITHUB_APP_PRIVATE_KEY,
@@ -96,12 +90,9 @@ router.get("/repos/:owner", async (request, env, sentry) => {
   );
 });
 
-router.get("/gists/:owner", async (request, env, sentry) => {
-  const count = await countOfPublicGistsOfUser(
+router.get("/gists/:owner", async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
+  const count = await githubClient.countOfPublicGistsOfUser(
     request.params!.owner,
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -112,13 +103,10 @@ router.get("/gists/:owner", async (request, env, sentry) => {
   );
 })
 
-router.get("/updated/:owner/:repo", async (request, env, sentry) => {
-  const updated = await timeOfRepositoryLastUpdated(
+router.get("/updated/:owner/:repo", async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
+  const updated = await githubClient.timeOfRepositoryLastUpdated(
     request.params!.owner,
     request.params!.repo,
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -129,13 +117,10 @@ router.get("/updated/:owner/:repo", async (request, env, sentry) => {
   );
 })
 
-router.get("/created/:owner/:repo", async (request, env, sentry) => {
-  const created = await timeOfRepositoryCreated(
+router.get("/created/:owner/:repo", async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
+  const created = await githubClient.timeOfRepositoryCreated(
     request.params!.owner,
     request.params!.repo,
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
   let query = "";
   if (request.url.includes("?")) {
@@ -146,7 +131,7 @@ router.get("/created/:owner/:repo", async (request, env, sentry) => {
   );
 })
 
-router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
+router.get('/commits/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
@@ -167,12 +152,9 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
   }
-  const commits = await countOfCommitsAfterDate(
+  const commits = await githubClient.countOfCommitsAfterDate(
     request.params!.user,
     start,
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
 
   let title = ''
@@ -206,7 +188,7 @@ router.get('/commits/:periodicity/:user', async (request, env, sentry) => {
 })
 
 
-router.get('/contributions/:periodicity/:user', async (request, env, sentry) => {
+router.get('/contributions/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
   const tracer = (request as any).tracer as RequestTracer
   const now = new Date()
   let start = now;
@@ -228,15 +210,11 @@ router.get('/contributions/:periodicity/:user', async (request, env, sentry) => 
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
   }
-  const commits = await countOfUserContributionsAfterDate(
+  const commits = await githubClient.countOfUserContributionsAfterDate(
     request.params!.user,
     start,
     new Date(),
     request.params!.periodicity == 'all',
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
-    tracer,
   )
 
   let title = ''
@@ -269,7 +247,7 @@ router.get('/contributions/:periodicity/:user', async (request, env, sentry) => 
   );
 })
 
-router.get('/issues/:periodicity/:user', async (request, env, sentry) => {
+router.get('/issues/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
@@ -290,13 +268,10 @@ router.get('/issues/:periodicity/:user', async (request, env, sentry) => {
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
   }
-  const commits = await countOfIssueOrPRsAfterDate(
+  const commits = await githubClient.countOfIssueOrPRsAfterDate(
     request.params!.user,
     start,
     'issue',
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
 
   let title = ''
@@ -329,7 +304,7 @@ router.get('/issues/:periodicity/:user', async (request, env, sentry) => {
   );
 })
 
-router.get('/prs/:periodicity/:user', async (request, env, sentry) => {
+router.get('/prs/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
@@ -350,13 +325,10 @@ router.get('/prs/:periodicity/:user', async (request, env, sentry) => {
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
   }
-  const commits = await countOfIssueOrPRsAfterDate(
+  const commits = await githubClient.countOfIssueOrPRsAfterDate(
     request.params!.user,
     start,
     'pr',
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
 
   let title = ''
@@ -389,7 +361,7 @@ router.get('/prs/:periodicity/:user', async (request, env, sentry) => {
   );
 })
 
-router.get('/issues-and-prs/:periodicity/:user', async (request, env, sentry) => {
+router.get('/issues-and-prs/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
@@ -410,13 +382,10 @@ router.get('/issues-and-prs/:periodicity/:user', async (request, env, sentry) =>
     default:
       throw new Error(`unrecognized periodicity: ${request.params!.periodicity}`)
   }
-  const commits = await countOfIssueOrPRsAfterDate(
+  const commits = await githubClient.countOfIssueOrPRsAfterDate(
     request.params!.user,
     start,
     'both',
-    env.GITHUB_APP_ID,
-    env.GITHUB_APP_PRIVATE_KEY,
-    parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
   )
 
   let title = ''
@@ -469,11 +438,18 @@ const worker = {
       allowedSearchParams: /(.*)/,
       tracesSampleRate: 1.0,
     });
+    const githubClient = new GitHubClient(
+      env.GITHUB_APP_ID,
+      env.GITHUB_APP_PRIVATE_KEY,
+      parseInt(env.GITHUB_APP_DEFAULT_INSTALLATION_ID),
+      request.tracer
+    )
     try {
       const responseFromRouter = (await router.handle(
         request,
         env,
-        sentry
+        sentry,
+        githubClient
       )) as Response;
       return responseFromRouter;
     } catch (err) {
@@ -493,10 +469,10 @@ const hcConfig = {
   apiKey: '',
   dataset: '',
   sampleRates: {
-    '1xx': 20,
+    '1xx': 1,
     '2xx': 1,
-    '3xx': 5,
-    '4xx': 2,
+    '3xx': 1,
+    '4xx': 1,
     '5xx': 1,
     exception: 1,
   },
