@@ -83,7 +83,8 @@ export default class GitHubClient {
       owner: owner,
       repo: repository,
     });
-    return getRepoResponse.data.updated_at;
+    // it should use pushed_at instead of updated_at, see: https://github.community/t/difference-between-updated-at-and-pushed-at-in-repositories-list-response/13938
+    return getRepoResponse.data.pushed_at;
   }
 
   async timeOfRepositoryCreated(owner: string, repository: string) {
