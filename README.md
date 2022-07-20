@@ -6,6 +6,8 @@ It would be cheap and easy to deploy, more important, it has better availability
 
 ## Currently available badges
 
+### Visits Badge
+
 [![Visits Badge](https://badges.strrl.dev/visits/STRRL/serverless-github-badges)](https://badges.strrl.dev)
 
 Return the badge contains the counter of certain GitHub repository.
@@ -23,6 +25,8 @@ Markdown:
 ```
 
 ---
+
+### GitHub Membership Years Badge
 
 [![Years Badge](https://badges.strrl.dev/years/STRRL)](https://badges.strrl.dev)
 
@@ -42,9 +46,11 @@ Markdown:
 
 ---
 
+### GitHub Public Repositories Badge
+
 [![Public Repos Badge](https://badges.strrl.dev/repos/STRRL)](https://badges.strrl.dev)
 
-Return the badge contains the number of your public repository.
+Return the badge contains the number of your public repositories.
 
 URL:
 
@@ -59,6 +65,8 @@ Markdown:
 ```
 
 ---
+
+### GitHub Public Gists Badge
 
 [![Public Gists Badge](https://badges.strrl.dev/gists/STRRL)](https://badges.strrl.dev)
 
@@ -78,6 +86,8 @@ Markdown:
 
 ---
 
+### GitHub Repository Last Updated Time Badge
+
 [![Repo Updated Badge](https://badges.strrl.dev/updated/STRRL/serverless-github-badges)](https://badges.strrl.dev)
 
 Return the badge contains the last updated time of this repository.
@@ -96,6 +106,8 @@ Markdown:
 
 ---
 
+### GitHub Repository Created Time Badge
+
 [![Repo Created Badge](https://badges.strrl.dev/created/STRRL/serverless-github-badges)](https://badges.strrl.dev)
 
 Return the badge contains the created time of this repository.
@@ -113,6 +125,8 @@ Markdown:
 ```
 
 ---
+
+### GitHub Contributions Badge
 
 [![Contributions Badge](https://badges.strrl.dev/contributions/daily/STRRL)](https://badges.strrl.dev)
 
@@ -142,6 +156,8 @@ Markdown:
 
 ---
 
+### GitHub Commits Badge
+
 [![Commits Badge](https://badges.strrl.dev/commits/daily/STRRL)](https://badges.strrl.dev)
 
 [![Commits Badge](https://badges.strrl.dev/commits/weekly/STRRL)](https://badges.strrl.dev)
@@ -169,6 +185,8 @@ Markdown:
 ```
 
 ---
+
+### GitHub Issues Badge
 
 [![Issues Badge](https://badges.strrl.dev/issues/daily/STRRL)](https://badges.strrl.dev)
 
@@ -198,6 +216,8 @@ Markdown:
 
 ---
 
+### GitHub PRs Badge
+
 [![PRs Badge](https://badges.strrl.dev/prs/daily/STRRL)](https://badges.strrl.dev)
 
 [![PRs Badge](https://badges.strrl.dev/prs/weekly/STRRL)](https://badges.strrl.dev)
@@ -225,6 +245,8 @@ Markdown:
 ```
 
 ---
+
+### GitHub Issues and PRs Badge
 
 [![Issues and PRs Badge](https://badges.strrl.dev/issues-and-prs/daily/STRRL)](https://badges.strrl.dev)
 
