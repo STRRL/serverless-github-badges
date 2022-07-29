@@ -15,7 +15,7 @@ import Toucan from "toucan-js";
 import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
 import { Router, Request as RouterRequest } from "itty-router";
 
-import { RequestTracer, wrapModule } from "@cloudflare/workers-honeycomb-logger";
+import { wrapModule } from "@cloudflare/workers-honeycomb-logger";
 
 export interface Env {
   // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -137,6 +137,7 @@ router.get('/commits/:periodicity/:user', async (request: RouterRequest, env, se
   switch (request.params!.periodicity) {
     case 'all':
       start = new Date('1970-01-01');
+      break;
     case 'daily':
       start.setDate(now.getDate() - 1)
       break;
@@ -189,12 +190,12 @@ router.get('/commits/:periodicity/:user', async (request: RouterRequest, env, se
 
 
 router.get('/contributions/:periodicity/:user', async (request: RouterRequest, env, sentry, githubClient: GitHubClient) => {
-  const tracer = (request as any).tracer as RequestTracer
   const now = new Date()
   let start = now;
   switch (request.params!.periodicity) {
     case 'all':
       start = new Date('1970-01-01');
+      break;
     case 'daily':
       start.setDate(now.getDate() - 1)
       break;
@@ -253,6 +254,7 @@ router.get('/issues/:periodicity/:user', async (request: RouterRequest, env, sen
   switch (request.params!.periodicity) {
     case 'all':
       start = new Date('1970-01-01');
+      break;
     case 'daily':
       start.setDate(now.getDate() - 1)
       break;
@@ -310,6 +312,7 @@ router.get('/prs/:periodicity/:user', async (request: RouterRequest, env, sentry
   switch (request.params!.periodicity) {
     case 'all':
       start = new Date('1970-01-01');
+      break;
     case 'daily':
       start.setDate(now.getDate() - 1)
       break;
@@ -367,6 +370,7 @@ router.get('/issues-and-prs/:periodicity/:user', async (request: RouterRequest, 
   switch (request.params!.periodicity) {
     case 'all':
       start = new Date('1970-01-01');
+      break;
     case 'daily':
       start.setDate(now.getDate() - 1)
       break;
