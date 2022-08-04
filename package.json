@@ -14,8 +14,10 @@
   "dependencies": {
     "@cloudflare/workers-honeycomb-logger": "^2.1.0",
     "itty-router": "^2.6.1",
+    "mongodb": "^4.8.1",
     "node-rsa": "^1.1.1",
     "octokit": "^1.8.1",
+    "realm-web": "^1.7.1",
     "toucan-js": "^2.6.1"
   }
 }
