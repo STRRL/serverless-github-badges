@@ -140,7 +140,7 @@ Markdown:
 
 Return the badge contains the contributions in the certain periodicity.
 
-Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yearly`.
 
 URL:
 
@@ -170,7 +170,7 @@ Markdown:
 
 Return the badge contains the commits in the certain periodicity.
 
-Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yearly`.
 
 URL:
 
@@ -200,7 +200,7 @@ Markdown:
 
 Return the badge contains the created issues in the certain periodicity.
 
-Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yearly`.
 
 URL:
 
@@ -230,7 +230,7 @@ Markdown:
 
 Return the badge contains the created PRs in the certain periodicity.
 
-Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yearly`.
 
 URL:
 
@@ -260,7 +260,7 @@ Markdown:
 
 Return the badge contains the commits in the certain periodicity.
 
-Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yealy`.
+Available values for `periodicity`: `all`, `daily`, `weekly`, `monthly`, `yearly`.
 
 URL:
 
