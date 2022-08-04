@@ -19,19 +19,9 @@ import {
   RequestTracer,
   wrapModule,
 } from "@cloudflare/workers-honeycomb-logger";
-import { CloudflareWorkersKVCounter } from "./counter/cloudflare-workers-kv-counter";
 
 export interface Env {
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
   VISITS_KV: KVNamespace;
-  //
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
-
-  // There are several required secret environment variables, replace with wrangler secrets put <secret-name> before deploy your own service.
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_APP_DEFAULT_INSTALLATION_ID: string;
@@ -40,6 +30,8 @@ export interface Env {
   HONEYCOMB_DATASET: string;
   MONGODB_REALM_APPID: string;
   MONGODB_REALM_API_KEY: string;
+  MONGODB_DB_NAME: string;
+  MONGODB_COLLECTION_NAME: string;
 }
 
 const router = Router();
@@ -517,8 +509,12 @@ const worker = {
       request.tracer
     );
 
-    const visitsCounter = new MongoDBCounter(env.MONGODB_REALM_APPID,env.MONGODB_REALM_API_KEY);
-    // const visitsCounter = new CloudflareWorkersKVCounter(env.VISITS_KV);
+    const visitsCounter = new MongoDBCounter(
+      env.MONGODB_REALM_APPID,
+      env.MONGODB_REALM_API_KEY,
+      env.MONGODB_DB_NAME,
+      env.MONGODB_COLLECTION_NAME
+    );
 
     try {
       const responseFromRouter = (await router.handle(

@@ -12,10 +12,14 @@ export class MongoDBCounter implements ICounter {
   // private mongoServiceName: string;
   private mongoRealmAppID: string;
   private apiKey: string;
+  private dbName: string;
+  private collectionName: string;
 
-  constructor(mongoRealmAppID: string, apiKey: string) {
+  constructor(mongoRealmAppID: string, apiKey: string, dbName: string, collectionName: string) {
     this.mongoRealmAppID = mongoRealmAppID;
     this.apiKey = apiKey;
+    this.dbName = dbName;
+    this.collectionName = collectionName;
   }
 
   async increaseAndGet(identity: string): Promise<number> {
@@ -32,8 +36,9 @@ export class MongoDBCounter implements ICounter {
     const App = new Realm.App(this.mongoRealmAppID);
     const credentials = Realm.Credentials.apiKey(this.apiKey);
     const user = await App.logIn(credentials);
-    const client = user.mongoClient('serverless-github-badges');
-    const collection = client.db("serverless-github-badges").collection<VisitsCounter>("visits-counter")
+    // mongodb-atlas is hardcoded for now
+    const client = user.mongoClient('mongodb-atlas');
+    const collection = client.db(this.dbName).collection<VisitsCounter>(this.collectionName)
     return collection
   }
 }
