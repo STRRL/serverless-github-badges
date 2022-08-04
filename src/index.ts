@@ -165,6 +165,7 @@ router.get(
     switch (request.params!.periodicity) {
       case "all":
         start = new Date("1970-01-01");
+        break;
       case "daily":
         start.setDate(now.getDate() - 1);
         break;
@@ -229,6 +230,7 @@ router.get(
     switch (request.params!.periodicity) {
       case "all":
         start = new Date("1970-01-01");
+        break;
       case "daily":
         start.setDate(now.getDate() - 1);
         break;
@@ -294,6 +296,7 @@ router.get(
     switch (request.params!.periodicity) {
       case "all":
         start = new Date("1970-01-01");
+        break;
       case "daily":
         start.setDate(now.getDate() - 1);
         break;
@@ -358,6 +361,7 @@ router.get(
     switch (request.params!.periodicity) {
       case "all":
         start = new Date("1970-01-01");
+        break;
       case "daily":
         start.setDate(now.getDate() - 1);
         break;
@@ -422,6 +426,7 @@ router.get(
     switch (request.params!.periodicity) {
       case "all":
         start = new Date("1970-01-01");
+        break;
       case "daily":
         start.setDate(now.getDate() - 1);
         break;
