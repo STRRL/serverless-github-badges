@@ -1,14 +1,15 @@
-import { ICounter } from "./counter";
+import { ICounterStore } from "./counter";
 
 import * as Realm from "realm-web";
 
 type Document = globalThis.Realm.Services.MongoDB.Document;
 
 interface VisitsCounter extends Document {
+  identity: string,
   count: number;
 }
 
-export class MongoDBCounter implements ICounter {
+export class MongoDBCounter implements ICounterStore {
   // private mongoServiceName: string;
   private mongoRealmAppID: string;
   private apiKey: string;
@@ -41,4 +42,22 @@ export class MongoDBCounter implements ICounter {
     const collection = client.db(this.dbName).collection<VisitsCounter>(this.collectionName)
     return collection
   }
+
+  async set(identity: string, value: number) {
+    const collectionClient = await this.fetchClientWithCollection();
+    await collectionClient.updateOne({ identity: identity }, { $set: { count: value } })
+  };
+
+  async get(identity: string) {
+    const collectionClient = await this.fetchClientWithCollection();
+    const result = await collectionClient.findOne({ identity: identity })
+    return result?.count || 0
+  };
+
+  async list(): Promise<string[]> {
+    const collectionClient = await this.fetchClientWithCollection();
+    const result = await collectionClient.find()
+    return result.map(item => item.identity)
+  }
+
 }

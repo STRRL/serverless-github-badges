@@ -10,7 +10,7 @@
 
 import GitHubClient from "./github";
 import { fetchBadgeURL } from "./badge";
-import { ICounter } from "./counter/counter";
+import { ICounter, ICounterStore } from "./counter/counter";
 import { MongoDBCounter } from "./counter/mongodb-realm-counter";
 import Toucan from "toucan-js";
 import { buildNoCacheResponseAsProxy } from "./no-cache-proxy";
@@ -19,6 +19,7 @@ import {
   RequestTracer,
   wrapModule,
 } from "@cloudflare/workers-honeycomb-logger";
+import { CloudflareWorkersKVCounter } from "./counter/cloudflare-workers-kv-counter";
 
 export interface Env {
   VISITS_KV: KVNamespace;
