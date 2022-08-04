@@ -19,10 +19,8 @@ import {
   RequestTracer,
   wrapModule,
 } from "@cloudflare/workers-honeycomb-logger";
-import { CloudflareWorkersKVCounter } from "./counter/cloudflare-workers-kv-counter";
 
 export interface Env {
-  VISITS_KV: KVNamespace;
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_APP_DEFAULT_INSTALLATION_ID: string;

@@ -5,5 +5,5 @@ export interface ICounter {
 export interface ICounterStore extends ICounter {
   set: (identity: string, value: number) => Promise<void>;
   get: (identity: string) => Promise<number>;
-  list: () => Promise<string[]>;
+  listKeys: () => Promise<string[]>;
 }

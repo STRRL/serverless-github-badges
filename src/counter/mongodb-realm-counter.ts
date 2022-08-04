@@ -54,7 +54,7 @@ export class MongoDBCounter implements ICounterStore {
     return result?.count || 0
   };
 
-  async list(): Promise<string[]> {
+  async listKeys(): Promise<string[]> {
     const collectionClient = await this.fetchClientWithCollection();
     const result = await collectionClient.find()
     return result.map(item => item.identity)

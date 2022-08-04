@@ -35,7 +35,7 @@ export class CloudflareWorkersKVCounter implements ICounterStore {
     };
     return value.count
   };
-  async list(): Promise<string[]> {
+  async listKeys(): Promise<string[]> {
     const listResult = await this.kv.list();
     return listResult.keys.map(item => item.name)
   }
