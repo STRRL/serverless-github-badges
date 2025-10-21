@@ -27,10 +27,10 @@ export interface Env {
   SENTRY_DSN: string;
   HONEYCOMB_API_KEY: string;
   HONEYCOMB_DATASET: string;
-  MONGODB_REALM_APPID: string;
-  MONGODB_REALM_API_KEY: string;
+  MONGODB_CONNECTION_STRING: string;
   MONGODB_DB_NAME: string;
   MONGODB_COLLECTION_NAME: string;
+  MONGODB_POOL: DurableObjectNamespace;
 }
 
 const router = Router();
@@ -513,12 +513,10 @@ const worker = {
       request.tracer
     );
 
-    const visitsCounter = new MongoDBCounter(
-      env.MONGODB_REALM_APPID,
-      env.MONGODB_REALM_API_KEY,
-      env.MONGODB_DB_NAME,
-      env.MONGODB_COLLECTION_NAME
-    );
+    // Get Durable Object instance for MongoDB connection pooling
+    const mongoPoolId = env.MONGODB_POOL.idFromName("global-mongodb-pool");
+    const mongoPoolStub = env.MONGODB_POOL.get(mongoPoolId);
+    const visitsCounter = new MongoDBCounter(mongoPoolStub);
 
     try {
       const responseFromRouter = (await router.handle(
@@ -557,3 +555,6 @@ const hcConfig = {
 };
 
 export default wrapModule(hcConfig, worker);
+
+// Export Durable Object class for MongoDB connection pooling
+export { MongoDBConnectionPool } from "./mongo-pool";

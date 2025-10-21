@@ -2,3 +2,13 @@ name = "serverless-github-badges"
 main = "src/index.ts"
 compatibility_date = "2022-07-04"
 node_compat = true
+
+# Durable Objects configuration for MongoDB connection pooling
+[[durable_objects.bindings]]
+name = "MONGODB_POOL"
+class_name = "MongoDBConnectionPool"
+
+# Durable Object migrations (required for deployment)
+[[migrations]]
+tag = "v1"
+new_classes = ["MongoDBConnectionPool"]
