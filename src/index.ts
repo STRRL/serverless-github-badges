@@ -30,7 +30,6 @@ export interface Env {
   MONGODB_CONNECTION_STRING: string;
   MONGODB_DB_NAME: string;
   MONGODB_COLLECTION_NAME: string;
-  MONGODB_POOL: DurableObjectNamespace;
 }
 
 const router = Router();
@@ -513,10 +512,11 @@ const worker = {
       request.tracer
     );
 
-    // Get Durable Object instance for MongoDB connection pooling
-    const mongoPoolId = env.MONGODB_POOL.idFromName("global-mongodb-pool");
-    const mongoPoolStub = env.MONGODB_POOL.get(mongoPoolId);
-    const visitsCounter = new MongoDBCounter(mongoPoolStub);
+    const visitsCounter = new MongoDBCounter(
+      env.MONGODB_CONNECTION_STRING,
+      env.MONGODB_DB_NAME,
+      env.MONGODB_COLLECTION_NAME
+    );
 
     try {
       const responseFromRouter = (await router.handle(
@@ -555,6 +555,3 @@ const hcConfig = {
 };
 
 export default wrapModule(hcConfig, worker);
-
-// Export Durable Object class for MongoDB connection pooling
-export { MongoDBConnectionPool } from "./mongo-pool";

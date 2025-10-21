@@ -1,63 +1,85 @@
 import { ICounterStore } from "./counter";
+import { MongoClient } from "mongodb";
 
 /**
- * MongoDB Counter using Durable Objects for connection pooling
+ * MongoDB Counter using native MongoDB driver
  *
- * This implementation uses Cloudflare Durable Objects to maintain
- * a persistent MongoDB connection, avoiding reconnection overhead.
+ * Note: This creates a new connection for each request.
+ * For better performance with connection pooling, consider using
+ * Durable Objects (requires Cloudflare Workers Paid plan).
  */
 export class MongoDBCounter implements ICounterStore {
-  private mongoPoolStub: DurableObjectStub;
+  private connectionString: string;
+  private dbName: string;
+  private collectionName: string;
 
-  constructor(mongoPoolStub: DurableObjectStub) {
-    this.mongoPoolStub = mongoPoolStub;
+  constructor(connectionString: string, dbName: string, collectionName: string) {
+    this.connectionString = connectionString;
+    this.dbName = dbName;
+    this.collectionName = collectionName;
   }
 
   async increaseAndGet(identity: string): Promise<number> {
-    const response = await this.mongoPoolStub.fetch(
-      new Request("http://internal/increaseAndGet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity })
-      })
-    );
+    const client = new MongoClient(this.connectionString);
+    try {
+      await client.connect();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
 
-    const data = await response.json() as { count: number };
-    return data.count;
+      const result = await collection.findOneAndUpdate(
+        { identity },
+        { $inc: { count: 1 } },
+        { upsert: true, returnDocument: "after" }
+      );
+
+      return result?.count || 1;
+    } finally {
+      await client.close();
+    }
   }
 
   async set(identity: string, value: number): Promise<void> {
-    await this.mongoPoolStub.fetch(
-      new Request("http://internal/set", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity, value })
-      })
-    );
+    const client = new MongoClient(this.connectionString);
+    try {
+      await client.connect();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
+
+      await collection.updateOne(
+        { identity },
+        { $set: { count: value } },
+        { upsert: true }
+      );
+    } finally {
+      await client.close();
+    }
   }
 
   async get(identity: string): Promise<number> {
-    const response = await this.mongoPoolStub.fetch(
-      new Request("http://internal/get", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identity })
-      })
-    );
+    const client = new MongoClient(this.connectionString);
+    try {
+      await client.connect();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
 
-    const data = await response.json() as { count: number };
-    return data.count;
+      const result = await collection.findOne({ identity });
+      return result?.count || 0;
+    } finally {
+      await client.close();
+    }
   }
 
   async listKeys(): Promise<string[]> {
-    const response = await this.mongoPoolStub.fetch(
-      new Request("http://internal/listKeys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-    );
+    const client = new MongoClient(this.connectionString);
+    try {
+      await client.connect();
+      const db = client.db(this.dbName);
+      const collection = db.collection(this.collectionName);
 
-    const data = await response.json() as { keys: string[] };
-    return data.keys;
+      const results = await collection.find().toArray();
+      return results.map((item: any) => item.identity);
+    } finally {
+      await client.close();
+    }
   }
 }
