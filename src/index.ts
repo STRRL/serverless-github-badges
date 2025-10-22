@@ -27,8 +27,7 @@ export interface Env {
   SENTRY_DSN: string;
   HONEYCOMB_API_KEY: string;
   HONEYCOMB_DATASET: string;
-  MONGODB_REALM_APPID: string;
-  MONGODB_REALM_API_KEY: string;
+  MONGODB_CONNECTION_STRING: string;
   MONGODB_DB_NAME: string;
   MONGODB_COLLECTION_NAME: string;
 }
@@ -514,8 +513,7 @@ const worker = {
     );
 
     const visitsCounter = new MongoDBCounter(
-      env.MONGODB_REALM_APPID,
-      env.MONGODB_REALM_API_KEY,
+      env.MONGODB_CONNECTION_STRING,
       env.MONGODB_DB_NAME,
       env.MONGODB_COLLECTION_NAME
     );
