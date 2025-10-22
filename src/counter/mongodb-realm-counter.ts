@@ -32,7 +32,8 @@ export class MongoDBCounter implements ICounterStore {
         { upsert: true, returnDocument: "after" }
       );
 
-      return result?.count || 1;
+      // MongoDB 5.x returns result.value for the updated document
+      return result.value?.count || result?.count || 1;
     } finally {
       await client.close();
     }
